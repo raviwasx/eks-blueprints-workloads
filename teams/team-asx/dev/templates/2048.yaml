@@ -122,4 +122,4 @@ spec:
             service:
               name: service-2048
               port:
-                number: 80
+                number: 8080

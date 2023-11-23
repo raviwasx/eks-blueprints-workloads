@@ -1,107 +1,55 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: asx-ingress
-  labels:
-    app: asx
-    {{- toYaml .Values.labels | nindent 4 }}
+  name: holiday-api-ingress
   annotations:
-{{ if eq .Values.spec.ingress.type "nginx" }}
-    #nginx annotations
-{{ else }}
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 8080}]'
     alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: 'ip'
-  {{ if .Values.spec.ingress.host }} # we can't use grouping without custom domain
-    alb.ingress.kubernetes.io/group.name: asx
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80,"HTTPS": 443}]'
-    alb.ingress.kubernetes.io/ssl-redirect: '443'
-  {{ else }}
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
-  {{ end }}
-    alb.ingress.kubernetes.io/backend-protocol: 'HTTP'
-    alb.ingress.kubernetes.io/tags: Environment={{ .Values.labels.env }},Team=ASX
-{{ end }}
-  {{ if .Values.spec.ingress.host }}
-    external-dns.alpha.kubernetes.io/set-identifier: {{ .Values.spec.clusterName }}
-    external-dns.alpha.kubernetes.io/aws-weight: '{{ .Values.spec.ingress.route53_weight }}'
-    external-dns.alpha.kubernetes.io/ttl: "10"
-  {{ end }}    
+    alb.ingress.kubernetes.io/tags: Environment=ASX-EKS,Team=Group1
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: "/holiday/20231225"
+    alb.ingress.kubernetes.io/healthcheck-port: "8080"
 spec:
-{{ if eq .Values.spec.ingress.type "nginx" }}
-  kubernetes.io/ingress.class: "nginx"
-{{ else }}
   ingressClassName: alb
-{{ end }}
   rules:
-{{ if .Values.spec.ingress.host }}
-  - host: asx.{{ .Values.spec.ingress.host }}
-{{ else }}
-  - host:
-{{ end }}
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: asx
-            port:
-              number: 8080
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: holiday-api-service
+                port: 
+                  number: 8080
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: asx
-  labels:
-    app: asx-ingress-{{ .Values.spec.env }}  
+  name: holiday-api
 spec:
   ports:
   - port: 8080
     targetPort: 8080
+    protocol: TCP
   selector:
-    app: asx
+    app: holiday-api
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: asx
-  labels:
-    app: asx
-    {{- toYaml .Values.labels | nindent 4 }}
+  name: holiday-api-deployment
 spec:
-  replicas: 3
-  revisionHistoryLimit: 3
   selector:
     matchLabels:
-      app: asx
+      app: holiday-api
+  replicas: 3
   template:
     metadata:
       labels:
-        app: asx
-        seb: test
+        app: holiday-api
     spec:
       containers:
-        - name: asx
-          image: 045549827180.dkr.ecr.us-west-2.amazonaws.com/asxmod_group1:v1
-          imagePullPolicy: Always
-          env:
-          - name: CLUSTER_NAME
-            value: {{ .Values.spec.clusterName }}
-          ports:
-            - containerPort: 8080
-          resources:
-            limits:
-              cpu: 500m
-              memory: 512Mi
-            requests:
-              cpu: 250m
-              memory: 50Mi
-      {{ if .Values.spec.karpenterInstanceProfile }}
-      nodeSelector:
-        team: asx
-        type: karpenter
-      tolerations:
-        - key: 'asx'
-          operator: 'Exists'
-          effect: 'NoSchedule'
-      {{ end }}
+      - name: holiday-api
+        image: 045549827180.dkr.ecr.us-west-2.amazonaws.com/asxmod_group1:v1
+        ports:
+         - containerPort: 8080

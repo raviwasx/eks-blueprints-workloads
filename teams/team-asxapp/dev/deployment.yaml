@@ -9,7 +9,7 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    app: holiday-api-service
+    app: holiday-api
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress

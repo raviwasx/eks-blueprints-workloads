@@ -48,6 +48,7 @@ spec:
     metadata:
       labels:
         app: holiday-api
+        owner: team-group1
     spec:
       containers:
       - name: holiday-api

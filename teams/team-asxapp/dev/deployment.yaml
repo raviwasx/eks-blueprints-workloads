@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: holiday-api-service
 spec:
-  clusterIP: None
+  #clusterIP: None
   ports:
   - port: 8080
     protocol: TCP

@@ -15,7 +15,7 @@ spec:
   source:
     repoURL: https://github.com/vijaylrao/AWS_EKS_Training_20231122.git
     targetRevision: main
-    path: /
+    path: ./
   syncPolicy:
     automated:
       prune: true

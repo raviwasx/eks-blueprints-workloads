@@ -18,7 +18,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: holiday-api-service
+                name: holiday-api
                 port: 
                   number: 8080
 ---

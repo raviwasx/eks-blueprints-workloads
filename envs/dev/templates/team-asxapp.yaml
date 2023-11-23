@@ -13,9 +13,9 @@ spec:
     namespace: team-asxapp
     server: {{ .Values.spec.destination.server }}
   source:
-    repoURL: {{ .Values.spec.source.repoURL }}
-    targetRevision: {{ .Values.spec.source.targetRevision }}
-    path: teams/team-asxapp/dev
+    repoURL: https://github.com/vijaylrao/AWS_EKS_Training_20231122/blob/main/pod_with_ingress_group1.yaml
+    targetRevision: main
+    path: /
   syncPolicy:
     automated:
       prune: true
